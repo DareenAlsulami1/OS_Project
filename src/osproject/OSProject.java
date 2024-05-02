@@ -215,6 +215,7 @@ public class OSProject {
         if (JobInCPU != null) {
 
             // update B.T
+            
             JobInCPU.setBusrtTime(JobInCPU.getBusrtTime() - JobInCPU.getAccuredT());
             JobInCPU.setTurnAT(JobInCPU.getFinishTime() - JobInCPU.getArrivingTime());
 
@@ -252,6 +253,7 @@ public class OSProject {
 
                 if (HoldQueue2.peek().getRequestedMemory() <= avbMemory && HoldQueue2.peek().getRequestedDevice() <= avbDevices) {
 
+                    
                     avbMemory -= HoldQueue2.peek().getRequestedMemory();
                     avbDevices -= HoldQueue2.peek().getRequestedDevice();
                     readyQ.add(HoldQueue2.poll());
@@ -271,24 +273,25 @@ public class OSProject {
 
         for (Job job : completeQ) {
 
-            System.out.println(job.getJobNumber() + " completed at " + job.getFinishTime() + "   " + job.getArrivingTime() + "  " + job.getFinishTime() + "  " + job.getTurnAT());
+            System.out.println(job.getJobNumber() + " completed at " + job.getFinishTime() +"    "+job.getAccuredT() +"       " + job.getArrivingTime() + "      " + job.getFinishTime() + "      " + job.getTurnAT());
         }
 
         for (Job job : readyQ) {
-            System.out.println(job.getJobNumber() + " Ready Queue " + job.getArrivingTime() + "  " + job.getFinishTime() + "  " + job.getTurnAT());
+            System.out.println(job.getJobNumber() + " Ready Queue " + job.getArrivingTime() + "     " + job.getFinishTime() + "     " + job.getTurnAT());
         }
 
         for (Job job : HoldQueue1) {
-            System.out.println(job.getJobNumber() + " Hold Queue 1 " + job.getArrivingTime() + "  " + job.getFinishTime() + "  " + job.getTurnAT());
+            System.out.println(job.getJobNumber() + " Hold Queue 1 " + job.getArrivingTime() + "      " + job.getFinishTime() + "     " + job.getTurnAT());
         }
 
         for (Job job : HoldQueue2) {
-            System.out.println(job.getJobNumber() + " Hold Queue 2 " + job.getArrivingTime() + "  " + job.getFinishTime() + "  " + job.getTurnAT());
+            System.out.println(job.getJobNumber() + " Hold Queue 2 " + job.getArrivingTime() + "      " + job.getFinishTime() + "      " + job.getTurnAT());
         }
 
         if( JobInCPU!=null){
              System.out.println(JobInCPU.getJobNumber()+" running in cpu "+JobInCPU.getArrivingTime()+"  "+JobInCPU.getFinishTime()+"  "+JobInCPU.getTurnAT());
         }
+        System.out.println("----------------------------------------------------------------------------------------------------------");
         /////////////////////////////
         System.out.print("Content of Submit Queue: ");
         for (Job job : submitQ) {
@@ -313,7 +316,9 @@ public class OSProject {
             System.out.print(job.getJobNumber() + ", ");
         }
         System.out.println("");
+        System.out.println("----------------------------------------------------------------------------------------------------------");
         ////////////////////////////////////////////////
+        
         if (submitQ.poll().getArrivingTime() == 999999) {
             //print the TAT for the system>>
             int system_TAT = 0;
