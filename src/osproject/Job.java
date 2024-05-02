@@ -116,4 +116,10 @@ public class Job {
         this.turnAT = turnAT;
     }
 
+    @Override
+    public String toString() {
+        return "Job{" + "arrivingTime=" + arrivingTime + ", jobNumber=" + jobNumber + ", requestedMemory=" + requestedMemory + ", requestedDevice=" + requestedDevice + ", priority=" + priority + ", busrtTime=" + busrtTime + ", startTime=" + startTime + ", finishTime=" + finishTime + ", accuredT=" + accuredT + ", turnAT=" + turnAT + '}';
+    }
+
+    
 }
