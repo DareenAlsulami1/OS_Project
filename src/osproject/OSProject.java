@@ -201,9 +201,6 @@ public class OSProject {
 
         if (!submitQ.isEmpty()) {
 
-            System.out.println(submitQ.peek().getJobNumber());
-            System.out.println("memo " + submitQ.peek().requestedMemory + " dev " + submitQ.peek().requestedDevice);
-            System.out.println("av memo " + avbMemory + " av dev " + avbDevices + "\n -------------");
 
             if (submitQ.peek().getJobNumber() == -1) {
                 Display(currentTime, write);
@@ -223,12 +220,7 @@ public class OSProject {
             }
         }
 
-        System.out.println("in hod 2");
-        for (Job job : HoldQueue2) {
-            System.out.println(job.getJobNumber());
-        }
-
-        System.out.println("---------------");
+       
 
     }
 
