@@ -22,6 +22,18 @@ public class OSProject {
     static Queue<Job> submitQ = new LinkedList<Job>();
     static Queue<Job> readyQ = new LinkedList<Job>();
     static Queue<Job> HoldQueue2 = new LinkedList<Job>();
+
+    public static PriorityQueue<Job> completeQ = new PriorityQueue<Job>(new Comparator<Job>() {
+        @Override
+        public int compare(Job o1, Job o2) {
+            if (o1.getArrivingTime() < o2.getArrivingTime()) {
+                return -1;
+            } else {
+                return 1;
+            }
+        }
+    });
+
     public static PriorityQueue<Job> HoldQueue1 = new PriorityQueue<Job>(new Comparator<Job>() {
         @Override
         public int compare(Job o1, Job o2) {
@@ -42,16 +54,15 @@ public class OSProject {
 
     });
 
-    static Queue<Job> completeQ = new LinkedList<Job>();
-
+    // static Queue<Job> completeQ = new LinkedList<Job>();
     public static Job JobInCPU = null; // jobs in cpu 
 
     public static void main(String[] args) throws FileNotFoundException {
         File infile = new File("input.txt");
         Scanner input = new Scanner(infile);
         System.out.println("test1");
-        
-        File output = new File ("output.txt");
+
+        File output = new File("output.txt");
         write = new PrintWriter(output);
 
         String line;
@@ -70,9 +81,8 @@ public class OSProject {
         currentTime = startingTime; // initilaiz current time 
         avbMemory = mainMemorySize;
         avbDevices = devices;
-        
-      //  System.out.println(startingTime+""+mainMemorySize+""+devices);/////////
-        
+
+        //  System.out.println(startingTime+""+mainMemorySize+""+devices);/////////
         while (input.hasNextLine()) {
             // read line by line from the input file
             line = input.nextLine().replaceAll("[a-zA-Z]=", "");
@@ -99,7 +109,7 @@ public class OSProject {
             } else if (command[0].equals("D")) {
                 int time = Integer.parseInt(command[1]);
                 submitQ.add(new Job(time, -1));
-                
+
             }
 
         }
@@ -111,7 +121,6 @@ public class OSProject {
         avbMemory -= temp_job.getRequestedMemory();
         avbDevices -= temp_job.getRequestedDevice();
         Quantum = temp_job.getBusrtTime();
-        
 
         Get_IN_CPU(temp_job, currentTime);
         submitQ.poll();
@@ -125,8 +134,8 @@ public class OSProject {
             } else {
                 i = 999999;
             }
-            
-         //  System.out.println(i);
+
+            //  System.out.println(i);
             //-----------------------------------------------------------------
             if (JobInCPU != null) {
                 e = JobInCPU.getFinishTime();
@@ -147,13 +156,13 @@ public class OSProject {
             }
 
         }
-       
+
         input.close();
         write.close();
     }
 
     public static void Get_IN_CPU(Job job, int CurrentTime) {
-      JobInCPU=job;
+        JobInCPU = job;
         job.setStartTime(CurrentTime);
 
         if (job.getBusrtTime() <= Quantum) {
@@ -168,12 +177,11 @@ public class OSProject {
     }
 
     private static void InternalEvent(int currentTime) {
-       
+
         Get_OUT_CPU();//release
         Get_OUT_Hold();
 
         if (!readyQ.isEmpty()) {
-           
             Get_IN_CPU(readyQ.poll(), currentTime);
 
             // updating SA and AR, Quantum
@@ -181,33 +189,47 @@ public class OSProject {
                 SR += job.getBusrtTime();
 
             }
-            if (readyQ.size() > 0) {
+            if (!readyQ.isEmpty()) {
                 AR = SR / readyQ.size();
-                Quantum = AR;
-            } else {
                 Quantum = AR;
             }
         }
+
     }
 
     private static void ExternalEvent(int currentTime) {
-      
+
         if (!submitQ.isEmpty()) {
+
+            System.out.println(submitQ.peek().getJobNumber());
+            System.out.println("memo " + submitQ.peek().requestedMemory + " dev " + submitQ.peek().requestedDevice);
+            System.out.println("av memo " + avbMemory + " av dev " + avbDevices + "\n -------------");
 
             if (submitQ.peek().getJobNumber() == -1) {
                 Display(currentTime, write);
 
             } else {
-                if (submitQ.peek().requestedMemory <= avbMemory && submitQ.peek().requestedDevice <= avbDevices) {
-                    readyQ.add(submitQ.poll());
+                Job j1 = submitQ.poll();
+                if (j1.getRequestedMemory() <= avbMemory && j1.getRequestedDevice() <= avbDevices) {
+                    avbMemory -= j1.getRequestedMemory();
+                    avbDevices -= j1.getRequestedDevice();
+                    readyQ.add(j1);
                 } else if (submitQ.peek().priority == 1) {
-                    HoldQueue1.add(submitQ.poll());
+                    HoldQueue1.add(j1);
                 } else {
-                    HoldQueue2.add(submitQ.poll());
+                    HoldQueue2.add(j1);
 
                 }
             }
         }
+
+        System.out.println("in hod 2");
+        for (Job job : HoldQueue2) {
+            System.out.println(job.getJobNumber());
+        }
+
+        System.out.println("---------------");
+
     }
 
     private static void Get_OUT_CPU() {
@@ -215,7 +237,6 @@ public class OSProject {
         if (JobInCPU != null) {
 
             // update B.T
-            
             JobInCPU.setBusrtTime(JobInCPU.getBusrtTime() - JobInCPU.getAccuredT());
             JobInCPU.setTurnAT(JobInCPU.getFinishTime() - JobInCPU.getArrivingTime());
 
@@ -253,7 +274,6 @@ public class OSProject {
 
                 if (HoldQueue2.peek().getRequestedMemory() <= avbMemory && HoldQueue2.peek().getRequestedDevice() <= avbDevices) {
 
-                    
                     avbMemory -= HoldQueue2.peek().getRequestedMemory();
                     avbDevices -= HoldQueue2.peek().getRequestedDevice();
                     readyQ.add(HoldQueue2.poll());
@@ -265,39 +285,22 @@ public class OSProject {
     }
 
     private static void Display(int currentTime, PrintWriter write) {
-       System.out.println("System Configuration:\n----------------------------------");
-        System.out.println("Memory Size: " + avbMemory + "  No of Devices: " + avbDevices);
+        System.out.println("At "+currentTime);
+        System.out.println("System Configuration:\n----------------------------------");
+        System.out.println("Avilable Memory Size: " + avbMemory + "  Avilable No of Devices: " + avbDevices);
         System.out.println("------------------------------------------------------------\n");
         System.out.println("|Process   |Status           |Burst Time     |Arrival Time         |Completion Time |Turnaround Time |");
         System.out.println("----------------------------------------------------------------------------------------------------------");
 
         for (Job job : completeQ) {
 
-            System.out.println(job.getJobNumber() + " completed at " + job.getFinishTime() +"    "+job.getAccuredT() +"       " + job.getArrivingTime() + "      " + job.getFinishTime() + "      " + job.getTurnAT());
+            System.out.println(job.getJobNumber() + " completed at " + job.getFinishTime() + "    " + job.getAccuredT() + "       " + job.getArrivingTime() + "      " + job.getFinishTime() + "      " + job.getTurnAT());
         }
 
-        for (Job job : readyQ) {
-            System.out.println(job.getJobNumber() + " Ready Queue " + job.getArrivingTime() + "     " + job.getFinishTime() + "     " + job.getTurnAT());
-        }
-
-        for (Job job : HoldQueue1) {
-            System.out.println(job.getJobNumber() + " Hold Queue 1 " + job.getArrivingTime() + "      " + job.getFinishTime() + "     " + job.getTurnAT());
-        }
-
-        for (Job job : HoldQueue2) {
-            System.out.println(job.getJobNumber() + " Hold Queue 2 " + job.getArrivingTime() + "      " + job.getFinishTime() + "      " + job.getTurnAT());
-        }
-
-        if( JobInCPU!=null){
-             System.out.println(JobInCPU.getJobNumber()+" running in cpu "+JobInCPU.getArrivingTime()+"  "+JobInCPU.getFinishTime()+"  "+JobInCPU.getTurnAT());
-        }
         System.out.println("----------------------------------------------------------------------------------------------------------");
-        /////////////////////////////
-        System.out.print("Content of Submit Queue: ");
-        for (Job job : submitQ) {
-            System.out.print(job.getJobNumber() + ", ");
-        }
-        System.out.println("");
+
+        System.out.println("running in cpu");
+        System.out.println(JobInCPU.getJobNumber() + " running in cpu " + JobInCPU.getArrivingTime() + "  " + JobInCPU.getFinishTime() + "  " + JobInCPU.getTurnAT() + "\n");
 
         System.out.print("Content of Ready Queue: ");
         for (Job job : readyQ) {
@@ -318,7 +321,7 @@ public class OSProject {
         System.out.println("");
         System.out.println("----------------------------------------------------------------------------------------------------------");
         ////////////////////////////////////////////////
-        
+
         if (submitQ.poll().getArrivingTime() == 999999) {
             //print the TAT for the system>>
             int system_TAT = 0;
