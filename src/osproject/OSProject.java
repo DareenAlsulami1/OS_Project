@@ -207,11 +207,12 @@ public class OSProject {
 
             } else {
                 Job j1 = submitQ.poll();
+                
                 if (j1.getRequestedMemory() <= avbMemory && j1.getRequestedDevice() <= avbDevices) {
                     avbMemory -= j1.getRequestedMemory();
                     avbDevices -= j1.getRequestedDevice();
                     readyQ.add(j1);
-                } else if (submitQ.peek().priority == 1) {
+                } else if (j1.getPriority() == 1) {
                     HoldQueue1.add(j1);
                 } else {
                     HoldQueue2.add(j1);
@@ -291,8 +292,10 @@ public class OSProject {
 
         System.out.println("----------------------------------------------------------------------------------------------------------");
 
-        System.out.println("running in cpu");
-        System.out.println(JobInCPU.getJobNumber() + " running in cpu " + JobInCPU.getArrivingTime() + "  " + JobInCPU.getFinishTime() + "  " + JobInCPU.getTurnAT() + "\n");
+        System.out.println("Process running on the CPU: ");
+        System.out.println("-----------------------------");
+        System.out.println("  Job ID   Run Time   Time Left");
+        System.out.println("  "+JobInCPU.getJobNumber() +"           " + JobInCPU.getAccuredT() + "       " + JobInCPU.getBusrtTime() + "\n");
 
         System.out.print("Content of Ready Queue: ");
         for (Job job : readyQ) {
